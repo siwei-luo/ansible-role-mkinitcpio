@@ -1,0 +1,20 @@
+---
+
+mkinitcpio_active: true
+
+mkinitcpio_binaries: ""
+
+mkinitcpio_preset_name: linux
+
+mkinitcpio_files: ""
+
+mkinitcpio_hooks: >-
+  base udev autodetect microcode modconf block filesystems fsck
+
+mkinitcpio_modules: ""
+
+mkinitcpio_kernel_cmdline: nowatchdog
+
+mkinitcpio_luks: false
+mkinitcpio_luks_root_device: sda
+mkinitcpio_luks_root_partition: sda2

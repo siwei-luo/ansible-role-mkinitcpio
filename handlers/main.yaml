@@ -1,0 +1,7 @@
+---
+
+- name: MKINITCPIO regenerate
+  ansible.builtin.command:
+    cmd: mkinitcpio -P
+  become: true
+  changed_when: false

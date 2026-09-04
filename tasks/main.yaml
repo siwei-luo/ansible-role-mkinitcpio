@@ -1,0 +1,69 @@
+---
+
+- name: MKINITCPIO
+  become: true
+  tags:
+    - mkinitcpio
+  when: mkinitcpio_active
+  block:
+
+    - name: MKINITCPIO configure `/etc/mkinitcpio.d`
+      ansible.builtin.file:
+        path: /etc/mkinitcpio.d
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: MKINITCPIO configure `/var/cache/boot`
+      ansible.builtin.file:
+        path: /var/cache/boot
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: MKINITCPIO configure `/etc/mkinitcpio.d/linux.preset`
+      ansible.builtin.template:
+        src: "{{ role_path }}/templates/linux.preset.j2"
+        dest: "/etc/mkinitcpio.d/{{ mkinitcpio_preset_name }}.preset"
+        owner: root
+        group: root
+        mode: "0644"
+      register: _preset
+      notify: MKINITCPIO regenerate
+
+    # safest way to re-trigger post install hooks which moves vmlinuz-linux to /var/cache/boot
+    - name: MKINITCPIO reinstall linux
+      ansible.builtin.command:
+        cmd: "pacman -S --noconfirm {{ mkinitcpio_preset_name }}"
+      register: pacman_result
+      when: _preset.changed
+
+    - name: MKINITCPIO template `/etc/mkinitcpio.conf`
+      ansible.builtin.template:
+        src: "{{ role_path }}/templates/mkinitcpio.conf.j2"
+        dest: /etc/mkinitcpio.conf
+        owner: root
+        group: root
+        mode: "0644"
+      notify: MKINITCPIO regenerate
+
+    - name: MKINITCPIO configure `/etc/kernel/cmdline`
+      ansible.builtin.template:
+        src: "{{ role_path }}/templates/cmdline.j2"
+        dest: /etc/kernel/cmdline
+        owner: root
+        group: root
+        mode: "0644"
+      notify: MKINITCPIO regenerate
+
+    - name: MKINITCPIO cleanup
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /boot/amd-ucode.img
+        - "/boot/initramfs-{{ mkinitcpio_preset_name }}.img"
+        - /boot/intel-ucode.img
+        - "/boot/vmlinuz-{{ mkinitcpio_preset_name }}"
