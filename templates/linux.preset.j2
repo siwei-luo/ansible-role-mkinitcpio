@@ -3,9 +3,10 @@
 
 #ALL_config="/etc/mkinitcpio.conf"
 ALL_kver="/var/cache/boot/vmlinuz-{{ mkinitcpio_preset_name }}"
-#ALL_kerneldest="/boot/vmlinuz-linux"
+#ALL_kerneldest="/boot/vmlinuz-{{ mkinitcpio_preset_name }}"
 
-PRESETS=('default' 'fallback')
+PRESETS=('default')
+#PRESETS=('default' 'fallback')
 
 #default_config="/etc/mkinitcpio.conf"
 #default_image="/boot/initramfs-{{ mkinitcpio_preset_name }}.img"
